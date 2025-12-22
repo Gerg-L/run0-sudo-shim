@@ -82,7 +82,6 @@
             formatting = treefmtEval.config.build.check self;
             vm = pkgs.testers.runNixOSTest {
               name = "run0-sudo-shim-vm-test";
-              node.pkgsReadOnly = false;
               nodes.machine = {
                 imports = [ self.nixosModules.default ];
                 security.polkit.persistentAuthentication = true;
