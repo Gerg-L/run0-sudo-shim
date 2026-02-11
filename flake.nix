@@ -23,7 +23,7 @@
     }:
     let
       inherit (nixpkgs) lib;
-      cargo-toml = (builtins.fromTOML (builtins.readFile ./Cargo.toml)).package;
+      cargo-toml = (lib.importTOML ./Cargo.toml).package;
       inherit (cargo-toml) name;
       forEachSystem =
         f:
