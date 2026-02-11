@@ -142,9 +142,9 @@
         in
         {
           options.security = {
-            polkit.persistentAuthentication = lib.mkEnableOption "patch polkit to allow persistent authentication and add rules";
+            polkit.persistentAuthentication = lib.mkEnableOption "patching polkit to allow persistent authentication and adding rules";
             run0-sudo-shim = {
-              enable = lib.mkEnableOption "enable run0-sudo-shim instead of sudo";
+              enable = lib.mkEnableOption "run0-sudo-shim instead of sudo";
               package = lib.mkPackageOption pkgs "run0-sudo-shim" { } // {
                 # should be removed when upstreaming to nixpkgs
                 default = pkgs.run0-sudo-shim or self.packages.${pkgs.stdenv.system}.default;
@@ -161,13 +161,11 @@
             (lib.mkIf config.security.polkit.persistentAuthentication {
               assertions =
                 let
-                  mkMessage = (
-                    package: minVer: ''
-                      To provide persistent authentication, Polkit requires `pidfd` support when fetching process details from D-Bus, which is only available in `${package}` version ${minVer} or later.
+                  mkMessage = package: minVer: ''
+                    To provide persistent authentication, Polkit requires `pidfd` support when fetching process details from D-Bus, which is only available in `${package}` version ${minVer} or later.
 
-                      Please update the package or switch `services.dbus.implementation` in the configuration.
-                    ''
-                  );
+                    Please update the package or switch `services.dbus.implementation` in the configuration.
+                  '';
                 in
                 [
                   (lib.mkIf (config.services.dbus.implementation == "dbus") {
