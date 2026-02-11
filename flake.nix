@@ -125,7 +125,7 @@
         // self.packages.${system}
       );
       githubActions = nix-github-actions.lib.mkGithubMatrix {
-        checks = nixpkgs.lib.getAttrs [ "x86_64-linux" ] self.checks;
+        checks = { inherit (self.checks) x86_64-linux; };
       };
 
       overlays.default = final: _: { ${name} = final.callPackage package { }; };
