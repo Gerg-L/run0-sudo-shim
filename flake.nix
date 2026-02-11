@@ -128,7 +128,7 @@
         checks = nixpkgs.lib.getAttrs [ "x86_64-linux" ] self.checks;
       };
 
-      overlays.default = final: prev: { ${name} = prev.callPackage package { }; };
+      overlays.default = final: _: { ${name} = final.callPackage package { }; };
 
       nixosModules.default =
         {
