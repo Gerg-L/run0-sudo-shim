@@ -44,12 +44,13 @@
             ]
         );
 
-      build-pkg =
-        pkgs:
-        let
-          inherit (pkgs) lib;
-        in
-        pkgs.rustPlatform.buildRustPackage {
+      package =
+        {
+          lib,
+          rustPlatform,
+          ...
+        }:
+        rustPlatform.buildRustPackage {
           inherit name;
           inherit (cargo-toml) version;
           src = lib.cleanSource ./.;
@@ -73,7 +74,7 @@
       packages = forEachSystem (
         { pkgs, system }:
         {
-          ${name} = build-pkg pkgs;
+          ${name} = pkgs.callPackage package { };
           default = self.packages.${system}.${name};
         }
       );
@@ -90,7 +91,6 @@
             ];
           };
         }
-
       );
 
       formatter = forEachSystem ({ pkgs, ... }: (treefmtEval pkgs).config.build.wrapper);
@@ -128,7 +128,7 @@
         checks = nixpkgs.lib.getAttrs [ "x86_64-linux" ] self.checks;
       };
 
-      overlays.default = final: prev: { ${name} = build-pkg prev; };
+      overlays.default = final: prev: { ${name} = prev.callPackage package { }; };
 
       nixosModules.default =
         {
@@ -147,7 +147,7 @@
               enable = lib.mkEnableOption "enable run0-sudo-shim instead of sudo";
               package = lib.mkPackageOption pkgs "run0-sudo-shim" { } // {
                 # should be removed when upstreaming to nixpkgs
-                default = pkgs.run0-sudo-shim or build-pkg pkgs;
+                default = pkgs.run0-sudo-shim or self.packages.${pkgs.stdenv.system}.default;
               };
             };
           };
