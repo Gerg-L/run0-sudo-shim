@@ -103,8 +103,11 @@
             name = "run0-sudo-shim-vm-test";
             nodes.machine = {
               imports = [ self.nixosModules.default ];
-              security.polkit.persistentAuthentication = true;
-              security.run0-sudo-shim.enable = true;
+              services.dbus.implementation = "broker";
+              security = {
+                polkit.persistentAuthentication = true;
+                run0-sudo-shim.enable = true;
+              };
 
               users.users = {
                 admin = {
