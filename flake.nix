@@ -3,10 +3,6 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
-    rust-overlay = {
-      url = "github:oxalica/rust-overlay";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     nix-github-actions = {
       url = "github:nix-community/nix-github-actions";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -21,7 +17,6 @@
     {
       self,
       nixpkgs,
-      rust-overlay,
       nix-github-actions,
       treefmt-nix,
       ...
@@ -38,10 +33,7 @@
               name = system;
               value = f {
                 inherit system;
-                pkgs = import nixpkgs {
-                  inherit system;
-                  overlays = [ (import rust-overlay) ];
-                };
+                pkgs = nixpkgs.legacyPackages.${system};
               };
             })
             [
@@ -87,15 +79,14 @@
       );
 
       devShells = forEachSystem (
-        { pkgs, ... }:
-        let
-          rustToolchain = pkgs.pkgsBuildHost.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
-        in
+        { pkgs, system }:
         {
           default = pkgs.mkShell {
-            buildInputs = [
-              rustToolchain
+            inputsFrom = [ self.packages.${system}.default ];
+            packages = [
+              pkgs.clippy
               pkgs.rust-analyzer
+              pkgs.rustfmt
             ];
           };
         }
